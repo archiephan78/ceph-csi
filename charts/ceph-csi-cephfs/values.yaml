@@ -27,7 +27,14 @@ serviceAccounts:
 #       - "<MONValue2>"
 #     cephFS:
 #       subvolumeGroup: "csi"
-csiConfig: []
+csiConfig:
+  - clusterID: 88fc2a4a-9f7d-11ec-ab70-35713fde9c82
+    monitors:
+      - 192.168.1.100
+      - 192.168.1.101
+      - 192.168.1.102
+    cephFS:
+      subvolumeGroup: "cephfs-csi"
 
 # Set logging level for csi containers.
 # Supported values from 0 to 5. 0 for general useful logs,
@@ -108,7 +115,7 @@ nodeplugin:
 
 provisioner:
   name: provisioner
-  replicaCount: 3
+  replicaCount: 1
   strategy:
     # RollingUpdate strategy replaces old pods with new ones gradually,
     # without incurring downtime.
@@ -215,7 +222,7 @@ topology:
 
 storageClass:
   # Specifies whether the Storage class should be created
-  create: false
+  create: true
   name: csi-cephfs-sc
   # Annotations for the storage class
   # Example:
@@ -227,15 +234,15 @@ storageClass:
   # Should be unique across all Ceph clusters in use for provisioning,
   # cannot be greater than 36 bytes in length, and should remain immutable for
   # the lifetime of the StorageClass in use.
-  clusterID: <cluster-ID>
+  clusterID: 88fc2a4a-9f7d-11ec-ab70-35713fde9c82
   # (required) CephFS filesystem name into which the volume shall be created
   # eg: fsName: myfs
-  fsName: myfs
+  fsName: cephfs
   # (optional) Ceph pool into which volume data shall be stored
   # pool: <cephfs-data-pool>
   # For eg:
   # pool: "replicapool"
-  pool: ""
+  pool: "cephfs-data"
   # (optional) Comma separated string of Ceph-fuse mount options.
   # For eg:
   # fuseMountOptions: debug
@@ -273,13 +280,13 @@ storageClass:
 
 secret:
   # Specifies whether the secret should be created
-  create: false
+  create: true
   name: csi-cephfs-secret
   # Key values correspond to a user name and its key, as defined in the
   # ceph cluster. User ID should have required access to the 'pool'
   # specified in the storage class
-  adminID: <plaintext ID>
-  adminKey: <Ceph auth key corresponding to ID above>
+  adminID: admin 
+  adminKey: xxx
 
 # This is a sample configmap that helps define a Ceph configuration as required
 # by the CSI plugins.
@@ -289,7 +296,8 @@ secret:
 # https://docs.ceph.com/en/latest/rados/configuration/ceph-conf/
 cephconf: |
   [global]
-    auth_cluster_required = cephx
+    fsid = 88fc2a4a-9f7d-11ec-ab70-35713fde9c82
+    mon_host = [v2:192.168.1.100:3300/0,v1:192.168.1.100:6789/0] [v2:192.168.1.101:3300/0,v1:192.168.1.101:6789/0] [v2:192.168.1.102:3300/0,v1:192.168.1.102:6789/0]
     auth_service_required = cephx
     auth_client_required = cephx
 

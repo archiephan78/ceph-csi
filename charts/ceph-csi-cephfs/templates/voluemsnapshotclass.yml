@@ -1,0 +1,11 @@
+apiVersion: snapshot.storage.k8s.io/v1
+deletionPolicy: Delete
+driver: cephfs.csi.ceph.com
+kind: VolumeSnapshotClass
+metadata:
+  name: csi-cephfsplugin-snapclass
+parameters:
+  clusterID: {{ .Values.storageClass.fsName }}
+  csi.storage.k8s.io/snapshotter-secret-name: {{ .Values.storageClass.provisionerSecret }}
+  csi.storage.k8s.io/snapshotter-secret-namespace: {{ .Release.Namespace }}
+  snapshotNamePrefix: cephfs
